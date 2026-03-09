@@ -31,11 +31,20 @@ VALID_PLATFORMS = ["Facebook", "Instagram", "Linkedin", "Reels", "Shorts", "X", 
 @app.put("/channel/update/{channel_name}/{platform}/{new_count}")
 def update_channel_count(channel_name: str, platform: str, new_count: int):
 
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         result = conn.execute(
             text(f'UPDATE "channel-wise-publishing" SET "{platform}" = :new_count WHERE "Channels" = :channel_name'),
             {"new_count": new_count, "channel_name": channel_name}
         )
 
     return {"message": f"{platform} count updated for channel {channel_name} to {new_count}"}
+
+@app.delete("/channel/{channel_name}")
+def delete_channel(channel_name:str):
+    with engine.begin() as conn:
+        result = conn.execute(text('DELETE FROM "channel-wise-publishing" WHERE "Channels" = :channel_name'),
+            {"channel_name": channel_name})
+
+    return {"message": f"Deleted channel {channel_name}"}
+
 
