@@ -64,7 +64,8 @@ def create_channel(channel: ChannelCreate):
     with engine.begin() as conn:
         existing = conn.execute(text('SELECT 1 FROM "channel-wise-publishing" WHERE "Channels" = :name'),
             {"name": channel.channel_name}).fetchone()
-        
+        if existing:
+            raise HTTPException(status_code=409, detail="channel already in table")
         conn.execute(text('''INSERT INTO "channel-wise-publishing" ("Channels", "Facebook", "Instagram", "Linkedin", "Reels", "Shorts", "X", "Youtube", "Threads")
             VALUES (:channel_name, :Facebook, :Instagram, :Linkedin, :Reels, :Shorts, :X, :Youtube, :Threads)
         '''), channel.model_dump(exclude={"channel_name"}) | {"channel_name": channel.channel_name})
